@@ -1,4 +1,5 @@
 # Freedium Bypass Extension 🔓
+<img width="1485" height="866" alt="image" src="https://github.com/user-attachments/assets/2145b1a3-9402-4811-a5bf-cb0d17326f10" />
 
 A simple Chrome extension that helps you read **Medium Member-only** articles for free using the Freedium Mirror service.
 
