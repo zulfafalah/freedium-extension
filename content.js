@@ -25,27 +25,27 @@
       </div>
       <div class="freedium-popup-body">
         <p class="freedium-popup-desc">
-          Extension ini membantu Anda membaca artikel <strong>Medium Member-only</strong> 
-          secara gratis menggunakan layanan <strong>Freedium Mirror</strong>.
+          This extension helps you read <strong>Medium Member-only</strong> articles 
+          for free using the <strong>Freedium Mirror</strong> service.
         </p>
         <div class="freedium-popup-info">
           <div class="freedium-info-item">
-            <span class="freedium-info-label">📖 Apa itu Freedium?</span>
-            <span class="freedium-info-value">Freedium adalah layanan mirror yang memungkinkan akses gratis ke artikel Medium berbayar.</span>
+            <span class="freedium-info-label">📖 What is Freedium?</span>
+            <span class="freedium-info-value">Freedium is a mirror service that allows free access to paid Medium articles.</span>
           </div>
           <div class="freedium-info-item">
-            <span class="freedium-info-label">🌐 Sumber</span>
+            <span class="freedium-info-label">🌐 Source</span>
             <span class="freedium-info-value">freedium-mirror.cfd</span>
           </div>
           <div class="freedium-info-item">
             <span class="freedium-info-label">⚠️ Disclaimer</span>
-            <span class="freedium-info-value">Extension ini tidak berafiliasi dengan Medium. Gunakan dengan bijak untuk tujuan edukasi.</span>
+            <span class="freedium-info-value">This extension is not affiliated with Medium. Use wisely for educational purposes.</span>
           </div>
         </div>
       </div>
       <div class="freedium-popup-footer">
-        <button class="freedium-popup-btn freedium-popup-btn-secondary" id="freedium-close-btn">Tutup</button>
-        <button class="freedium-popup-btn freedium-popup-btn-primary" id="freedium-open-btn">Buka di Freedium</button>
+        <button class="freedium-popup-btn freedium-popup-btn-secondary" id="freedium-close-btn">Close</button>
+        <button class="freedium-popup-btn freedium-popup-btn-primary" id="freedium-open-btn">Open in Freedium</button>
       </div>
     `;
 
@@ -86,7 +86,7 @@
     const button = document.createElement('button');
     button.className = 'freedium-button';
     button.textContent = 'Open in Freedium';
-    button.title = 'Buka artikel ini di Freedium (bypass paywall)';
+    button.title = 'Open this article in Freedium (bypass paywall)';
     
     button.addEventListener('click', (e) => {
       e.preventDefault();
