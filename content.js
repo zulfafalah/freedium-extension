@@ -99,58 +99,148 @@
     return button;
   }
 
-  // Function to find and add button next to member-only badge
+  // Function to find and add button next to member-only badge using text content
+  // This approach is more robust as it doesn't rely on dynamic class names
   function addButtonToMemberBadges() {
-    // Find all member-only story badges
-    const badges = document.querySelectorAll('div.hx.r.hy.ho.hz.fc.aq');
-    
-    badges.forEach(badge => {
-      // Check if button already added
-      if (badge.parentElement && badge.parentElement.querySelector('.freedium-button')) {
-        return;
+    // Use TreeWalker to find all text nodes containing "Member-only"
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: (node) => {
+          // Only accept text nodes that contain "Member-only" and have substantial content
+          if (node.textContent.trim() === 'Member-only story' || 
+              node.textContent.trim() === 'Member-only') {
+            return NodeFilter.FILTER_ACCEPT;
+          }
+          return NodeFilter.FILTER_REJECT;
+        }
+      }
+    );
+
+    const memberOnlyNodes = [];
+    while (walker.nextNode()) {
+      memberOnlyNodes.push(walker.currentNode);
+    }
+
+    memberOnlyNodes.forEach(textNode => {
+      // Find the parent container (go up to find a reasonable container)
+      let container = textNode.parentElement;
+      
+      // Go up a few levels to find the badge container
+      for (let i = 0; i < 5 && container; i++) {
+        // Check if this container or its parent already has a button
+        if (container.querySelector('.freedium-button') || 
+            container.parentElement?.querySelector('.freedium-button')) {
+          return;
+        }
+        
+        // Check if this looks like the badge container (has the star SVG nearby)
+        if (container.querySelector('svg') || container.previousElementSibling?.querySelector('svg')) {
+          break;
+        }
+        container = container.parentElement;
       }
 
-      // Also check for the text content to be sure it's the right element
-      const textElement = badge.querySelector('p');
-      if (textElement && textElement.textContent.includes('Member-only')) {
-        const button = createFreediumButton();
-        
-        // Create a wrapper to keep button next to badge
-        const wrapper = document.createElement('div');
-        wrapper.className = 'freedium-wrapper';
-        
-        // Insert wrapper after the badge
-        badge.parentNode.insertBefore(wrapper, badge.nextSibling);
-        wrapper.appendChild(button);
+      if (!container) return;
+
+      // Create wrapper and button
+      const button = createFreediumButton();
+      const wrapper = document.createElement('div');
+      wrapper.className = 'freedium-wrapper';
+      wrapper.appendChild(button);
+
+      // Insert after the container
+      if (container.nextSibling) {
+        container.parentNode.insertBefore(wrapper, container.nextSibling);
+      } else {
+        container.parentNode.appendChild(wrapper);
       }
     });
   }
 
-  // Alternative: Find by the star SVG icon (more reliable)
+  // Alternative: Find by the star SVG icon color (Medium's signature yellow)
+  // This is reliable because the color #FFC017 is consistent across Medium
   function addButtonByStarIcon() {
-    // Find SVG with the star pattern (yellow #FFC017 color)
-    const starSvgs = document.querySelectorAll('svg path[fill="#FFC017"]');
+    // Find SVG paths with Medium's signature yellow color
+    const starPaths = document.querySelectorAll('svg path[fill="#FFC017"]');
     
-    starSvgs.forEach(svg => {
-      const parentDiv = svg.closest('div.hx, div[class*="hx"]');
-      if (!parentDiv) return;
+    starPaths.forEach(path => {
+      // Get the SVG element and its parent
+      const svg = path.closest('svg');
+      if (!svg) return;
 
-      // Check if it contains "Member-only" text
-      const memberText = parentDiv.querySelector('p');
-      if (!memberText || !memberText.textContent.includes('Member-only')) return;
+      // Find the container that includes both the star and "Member-only" text
+      let container = svg.parentElement;
+      let foundMemberText = false;
 
-      // Check if button already exists
-      if (parentDiv.parentElement && parentDiv.parentElement.querySelector('.freedium-button')) {
+      // Traverse up to find the container with "Member-only" text
+      for (let i = 0; i < 6 && container && container !== document.body; i++) {
+        // Check for "Member-only" text in this container
+        if (container.textContent?.includes('Member-only')) {
+          foundMemberText = true;
+          break;
+        }
+        container = container.parentElement;
+      }
+
+      if (!foundMemberText || !container) return;
+
+      // Check if button already exists in the container or parent
+      if (container.querySelector('.freedium-button') || 
+          container.parentElement?.querySelector('.freedium-button')) {
         return;
       }
 
+      // Create and insert the button
       const button = createFreediumButton();
-      
-      // Insert button after the badge div
-      if (parentDiv.nextSibling) {
-        parentDiv.parentNode.insertBefore(button, parentDiv.nextSibling);
+      const wrapper = document.createElement('div');
+      wrapper.className = 'freedium-wrapper';
+      wrapper.appendChild(button);
+
+      // Insert after the container
+      if (container.nextSibling) {
+        container.parentNode.insertBefore(wrapper, container.nextSibling);
       } else {
-        parentDiv.parentNode.appendChild(button);
+        container.parentNode.appendChild(wrapper);
+      }
+    });
+  }
+
+  // Additional method: Find buttons in article cards on homepage/feed
+  function addButtonToArticleCards() {
+    // Find all article elements
+    const articles = document.querySelectorAll('article');
+    
+    articles.forEach(article => {
+      // Check if this article has the member-only indicator
+      const hasMemberBadge = article.textContent?.includes('Member-only') ||
+                             article.querySelector('svg path[fill="#FFC017"]');
+      
+      if (!hasMemberBadge) return;
+      
+      // Check if button already exists
+      if (article.querySelector('.freedium-button')) return;
+
+      // Find a good insertion point - look for the metadata area
+      // Usually near the author info or at the end of the article preview
+      const metaArea = article.querySelector('div[data-testid]') || 
+                       article.querySelector('span[data-testid]') ||
+                       article.lastElementChild;
+
+      if (!metaArea) return;
+
+      // Check if we already added a button nearby
+      if (metaArea.parentElement?.querySelector('.freedium-button')) return;
+
+      const button = createFreediumButton();
+      const wrapper = document.createElement('div');
+      wrapper.className = 'freedium-wrapper';
+      wrapper.appendChild(button);
+
+      // Try to insert near the metadata
+      if (metaArea.parentNode) {
+        metaArea.parentNode.appendChild(wrapper);
       }
     });
   }
@@ -159,6 +249,7 @@
   function init() {
     addButtonToMemberBadges();
     addButtonByStarIcon();
+    addButtonToArticleCards();
   }
 
   // Run on page load
