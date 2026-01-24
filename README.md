@@ -16,7 +16,7 @@ A simple Chrome extension that helps you read **Medium Member-only** articles fo
 4. Click **Load unpacked**
 5. Select the `freedium-extension` folder
 6. The extension is now installed! Visit any Medium article to use it
-
+7. Don’t forget to clear the cache using Ctrl + Shift + R to reload the page.
 ## Usage
 
 1. Navigate to any Medium article with a "Member-only story" badge
